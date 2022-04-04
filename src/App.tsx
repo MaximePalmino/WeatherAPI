@@ -1,24 +1,51 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import Form from './components/Form';
 
-function App() {
+
+
+interface ApiResponse{
+  main: {humidity: string, temp: number},
+  name: string,
+  sys: {country: string}
+}
+
+const App: React.FC = () => {
+
+  const [fetchedData, setFetchedData] = useState<ApiResponse | null>(null)
+  const [name, setName] = useState<string>('')
+  const [loading, setLoading] = useState<boolean | null>(null);
+
+  const ifLoading = () => {
+    if (loading) {
+      return <p>Checking...</p>;
+    } 
+  }
+  
+  const fetchAPI: Function = () => {
+    if (name) {
+      setLoading(true)
+      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${name}&appid=54c8d55b700b2f3808eacfca80fe9536`)
+        .then(reponse => reponse.json())
+          .then(data => {
+            setFetchedData(data)
+            setLoading(false)
+          })}
+  }
+
+
+  useEffect(() => {
+      fetchAPI()
+  }, [name])
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Form setName={setName} name={name} />
+      {ifLoading()}
+      {fetchedData?.main?.temp }
+      {fetchedData?.sys.country }
+  
+      {/* {fetchedData.sys.country} */}
     </div>
   );
 }
